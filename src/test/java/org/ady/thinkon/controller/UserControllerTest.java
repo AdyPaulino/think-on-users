@@ -2,6 +2,7 @@ package org.ady.thinkon.controller;
 
 import org.ady.thinkon.entity.User;
 import org.ady.thinkon.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,9 +18,12 @@ import static org.mockito.Mockito.when;
 /**
  * Class to test the UserController methods
  *
- * @author Ady Paulino 
+ * @author Ady Paulino
  */
+
 class UserControllerTest {
+
+    private AutoCloseable closeable;
 
     @Mock
     private UserService userService;
@@ -29,7 +33,12 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void closeService() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -39,6 +48,16 @@ class UserControllerTest {
         List<User> result = userController.getAllUsers().getBody();
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAllUsers_with1SavedUser_shouldReturnListWith1User() {
+        when(userService.getAllUsers()).thenReturn(List.of(getUser()));
+
+        List<User> result = userController.getAllUsers().getBody();
+
+        assertThat(result).isNotEmpty()
+                .hasSize(1);
     }
 
     @Test
@@ -61,9 +80,33 @@ class UserControllerTest {
         assertThat(result).isEqualTo(user);
     }
 
+    @Test
+    void updateUser_withValidIdAndUser_shouldReturnUpdatedUser() {
+        User originalUser = getUser();
+        User userToBeUpdated = getUser();
+        userToBeUpdated.setUsername("UpdatedUsername");
+        when(userService.getUserById(1L)).thenReturn(originalUser);
+        when(userService.updateUser(originalUser, userToBeUpdated)).thenReturn(userToBeUpdated);
+
+        User result = userController.updateUser(1L, originalUser).getBody();
+
+        assertThat(result).isNotNull().satisfies(
+                user -> assertThat(user.getUsername()).isEqualTo("UpdatedUsername")
+        );
+    }
+
+    @Test
+    void deleteUser_withValidId_shouldReturnSuccessMessage() {
+        User user = getUser();
+        when(userService.getUserById(1L)).thenReturn(user);
+
+        String result = userController.deleteUser(1L).getBody();
+
+        assertThat(result).isEqualTo("User successfully deleted!");
+    }
+
     private User getUser() {
         User user = new User();
-        user.setId(1L);
         user.setFirstName("firstName");
         user.setLastName("lastName");
         user.setUsername("username");

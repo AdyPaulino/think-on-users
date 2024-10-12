@@ -9,10 +9,10 @@ import jakarta.persistence.Table;
 /**
  * Entity class for User. H2 DB has the word "user" as a reserved word, so we need to use a different name for the table.
  *
- * @author Ady Paulino 
+ * @author Ady Paulino
  */
 @Entity
-@Table(name ="user_table")
+@Table(name = "user_table")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +27,6 @@ public class User {
     private String email;
 
     private String phoneNumber;
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public long getId() {
         return id;

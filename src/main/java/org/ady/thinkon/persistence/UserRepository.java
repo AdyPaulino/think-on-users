@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 /**
  * Persistence layer for User entity. Using default JpaRepository methods.
  *
- * @author Ady Paulino 
+ * @author Ady Paulino
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
